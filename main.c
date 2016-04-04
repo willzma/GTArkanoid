@@ -41,7 +41,6 @@ int main() {
   REG_DISPCNT = MODE_3 | BG2_EN;
 	enum gameState state = START;
 
-  u16 oldPlatformPixels[450];
   PLATFORM platform;
   platform.row = 140;
   platform.col = 105;
@@ -49,7 +48,6 @@ int main() {
   platform.cdel = 0;
   platform.image = GTsized2;
 
-  u16 oldBallPixels[80];
   BALL ball;
   ball.row = 105;
   ball.col = 110;
@@ -91,13 +89,6 @@ int main() {
 
           drawImage3(10, 0, 240, 150, techringsized);
 
-          for (int j = platform.row; j < 15 + platform.row; j++) {
-            for (int i = platform.col; i < 30 + platform.col; i++) {
-                oldPlatformPixels[(j - platform.row) * 30 + (i - platform.col)] =
-                    videoBuffer[j * 240 + i];
-            }
-          }
-
           drawSprite(platform.row, platform.col, 30, 15, GTsized2);
 
           for (int i = 0; i < 11; i++) {
@@ -107,26 +98,7 @@ int main() {
             }
           }
 
-          /*for (int i = 0; i < L1_NUMBLOCKS; i++) {
-            int blockRow = L1_BLOCKS[i].row;
-            int blockCol = L1_BLOCKS[i].col;
-
-            for (int j = blockRow; j < 8 + blockRow; j++) {
-              for (int k = blockCol; k < 16 + blockCol; k++) {
-                L1_BLOCKS[i].oldBlockPixels[(j - blockRow) * 16 + (k - blockCol)] =
-                    videoBuffer[j * 240 + k];
-              }
-            }
-          }*/
-
           createLevel1();
-
-          for (int j = ball.row; j < 8 + ball.row; j++) {
-            for (int i = ball.col; i < 10 + ball.col; i++) {
-                oldBallPixels[(j - ball.row) * 10 + (i - ball.col)] =
-                    videoBuffer[j * 240 + i];
-            }
-          }
 
           drawSprite(ball.row, ball.col, 10, 8, footballsized3);
 
@@ -143,15 +115,7 @@ int main() {
           if (platform.cdel != 0) {
               platform.col += platform.cdel;
 
-              drawImage3(platform.row,
-                platform.col - platform.cdel, 30, 15, oldPlatformPixels);
-
-              for (int j = platform.row; j < 15 + platform.row; j++) {
-                for (int i = platform.col; i < 30 + platform.col; i++) {
-                    oldPlatformPixels[(j - platform.row) * 30 + (i - platform.col)] =
-                        videoBuffer[j * 240 + i];
-                }
-              }
+              replace(platform.row, platform.col - platform.cdel, 30, 15, techringsized);
 
               drawSprite(platform.row,
                 platform.col, 30, 15, GTsized2);
@@ -160,15 +124,7 @@ int main() {
           ball.col += ball.cdel;
           ball.row += ball.rdel;
 
-          drawImage3(ball.row - ball.rdel,
-            ball.col - ball.cdel, 10, 8, oldBallPixels);
-
-          for (int j = ball.row; j < 8 + ball.row; j++) {
-            for (int i = ball.col; i < 10 + ball.col; i++) {
-                oldBallPixels[(j - ball.row) * 10 + (i - ball.col)] =
-                    videoBuffer[j * 240 + i];
-            }
-          }
+          replace(ball.row - ball.rdel, ball.col - ball.cdel, 10, 8, techringsized);
 
           drawSprite(ball.row,
             ball.col, 10, 8, footballsized3);
@@ -177,6 +133,20 @@ int main() {
               if (ball.col >= platform.col - 6 && ball.col <= platform.col + 26) {
                 ball.rdel = -1;
                 ball.cdel = 1 * platform.cdel;
+              }
+            } else if (ball.row + 7 >= platform.row && ball.row <= platform.row + 8) {
+              if (ball.col == platform.col - 7) {
+                ball.rdel = -1;
+                ball.cdel = -1;
+              } else if (ball.col == platform.col + 26) {
+                ball.rdel = -1;
+                ball.cdel = 1;
+              }
+            } else if (ball.row + 7 >= platform.row && ball.row <= platform.row) {
+              if (ball.col == platform.col - 7) {
+                ball.cdel = -1;
+              } else if (ball.col == platform.col + 26) {
+                ball.cdel = 1;
               }
             }
 
@@ -208,11 +178,57 @@ int main() {
 
                   numBlocks--;
 
-                  replaceBlock(L1_BLOCKS[i].row, L1_BLOCKS[i].col, 16, 8, techringsized);
+                  replace(L1_BLOCKS[i].row, L1_BLOCKS[i].col, 16, 8, techringsized);
 
                   L1_BLOCKS[i].col = -100;
                   L1_BLOCKS[i].row = -100;
                 }
+              } else if (ball.row + 8 == L1_BLOCKS[i].row) {
+                  if (ball.col + 5 >= L1_BLOCKS[i].col && ball.col <= L1_BLOCKS[i].col + 16) {
+                    ball.rdel = -1;
+
+                    score += 20;
+                    drawRect(0, 40, 40, 10, BLACK);
+                    sprintf(scoreBuffer, "%d", score);
+                    drawString(0, 40, scoreBuffer, WHITE);
+
+                    numBlocks--;
+
+                    replace(L1_BLOCKS[i].row, L1_BLOCKS[i].col, 16, 8, techringsized);
+
+                    L1_BLOCKS[i].col = -100;
+                    L1_BLOCKS[i].row = -100;
+                  }
+              } else if (ball.row <= L1_BLOCKS[i].row + 8 && ball.row >= L1_BLOCKS[i].row) {
+                  if (ball.col == L1_BLOCKS[i].col + 16) {
+                    ball.cdel = 1;
+
+                    score += 20;
+                    drawRect(0, 40, 40, 10, BLACK);
+                    sprintf(scoreBuffer, "%d", score);
+                    drawString(0, 40, scoreBuffer, WHITE);
+
+                    numBlocks--;
+
+                    replace(L1_BLOCKS[i].row, L1_BLOCKS[i].col, 16, 8, techringsized);
+
+                    L1_BLOCKS[i].col = -100;
+                    L1_BLOCKS[i].row = -100;
+                  } else if (ball.col + 10 == L1_BLOCKS[i].col) {
+                    ball.cdel = -1;
+
+                    score += 20;
+                    drawRect(0, 40, 40, 10, BLACK);
+                    sprintf(scoreBuffer, "%d", score);
+                    drawString(0, 40, scoreBuffer, WHITE);
+
+                    numBlocks--;
+
+                    replace(L1_BLOCKS[i].row, L1_BLOCKS[i].col, 16, 8, techringsized);
+
+                    L1_BLOCKS[i].col = -100;
+                    L1_BLOCKS[i].row = -100;
+                  }
               }
             }
 

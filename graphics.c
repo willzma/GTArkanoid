@@ -40,7 +40,7 @@ void drawImage3(int row, int col, int width, int height, const u16* image) {
 	}
 }
 
-void replaceBlock(int row, int col, int width, int height, const u16* image) {
+void replace(int row, int col, int width, int height, const u16* image) {
 	for(int r = 0; r < height; r++) {
 		DMA[DMA_CHANNEL_3].src = image + ((row + r - 10) * 240) + col;
 		DMA[DMA_CHANNEL_3].dst = videoBuffer + ((row + r) * 240) + col;

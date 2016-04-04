@@ -93,7 +93,7 @@ void delay(int n);
 void waitForVBlank();
 void fillScreen(u16 color);
 void drawImage3(int row, int col, int width, int height, const u16* image);
-void replaceBlock(int row, int col, int width, int height, const u16* image);
+void replace(int row, int col, int width, int height, const u16* image);
 void drawSprite(int r, int c, int width, int height, const u16* image);
 void drawChar(int row, int col, char ch, u16 color);
 void drawString(int row, int col, char *str, u16 color);
