@@ -1,0 +1,6 @@
+#ifndef STARTSPLASHSIZED_BITMAP_H
+#define STARTSPLASHSIZED_BITMAP_H
+extern const unsigned short startsplashsized[36000];
+#define STARTSPLASHSIZED_WIDTH 240
+#define STARTSPLASHSIZED_HEIGHT 150
+#endif
