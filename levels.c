@@ -1,4 +1,12 @@
 #include "graphics.h"
+#include "levels.h"
+
+#include "startsplashsized.h"
+#include "techringsized.h"
+#include "gameoversized.h"
+
+#include "footballsized3.h"
+#include "GTsized2.h"
 
 #include "redBlock.h"
 #include "whiteBlock.h"
@@ -15,7 +23,34 @@
 //actual game screen starts 10 rows down at column 0
 
 //Level 1 has 165 total blocks, 15 wide, 11 high
-void createLevel1() {
+void createLevel1(unsigned int* blockCounter, BLOCK blocks[L1_NUMBLOCKS],
+  PLATFORM* platform, BALL* ball) {
+
+  *blockCounter = L1_NUMBLOCKS;
+
+  for (int i = 0; i < 11; i++) {
+    for (int j = 0; j < 15; j++) {
+      blocks[(i * 15) + j].row = 10 + (i * 8);
+      blocks[(i * 15) + j].col = (j * 16);
+    }
+  }
+
+  platform -> row = 140;
+  platform -> col = 105;
+  platform -> rdel = 0;
+  platform -> cdel = 0;
+
+  ball -> row = 105;
+  ball -> col = 110;
+  ball -> rdel = 1;
+  ball -> cdel = 0;
+
+  drawImage3(10, 0, 240, 150, techringsized);
+
+  drawSprite(platform -> row, platform -> col, 30, 15, GTsized2);
+
+  drawSprite(ball -> row, ball -> col, 10, 8, footballsized3);
+
   DRAW_RED_BLOCKS(10, 0, 6);
   DRAW_WHITE_BLOCKS(10, 96, 3);
   DRAW_RED_BLOCKS(10, 144, 6);

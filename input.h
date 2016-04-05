@@ -2,8 +2,8 @@
 
 #define BUTTON_A      (1 << 0)
 #define BUTTON_B      (1 << 1)
-#define BUTTON_START  (1 << 2)
-#define BUTTON_SELECT (1 << 3)
+#define BUTTON_SELECT (1 << 2)
+#define BUTTON_START  (1 << 3)
 #define BUTTON_RIGHT  (1 << 4)
 #define BUTTON_LEFT   (1 << 5)
 #define BUTTON_UP     (1 << 6)

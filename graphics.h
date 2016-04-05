@@ -4,6 +4,8 @@ typedef unsigned short u16;
 #define MODE_3 3
 #define BG2_EN (1 << 10)
 
+#define INIT_MODE_3 REG_DISPCNT = MODE_3 | BG2_EN
+
 #define SCANLINECOUNTER *(volatile unsigned short *)0x4000006
 
 extern unsigned short *videoBuffer;
