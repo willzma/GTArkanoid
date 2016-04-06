@@ -7,26 +7,37 @@
 
 #include "startsplashsized.h"
 #include "techringsized.h"
+#include "buzz.h"
+#include "florida.h"
 #include "gameoversized.h"
+#include "you_win.h"
 
 #include "footballsized3.h"
 #include "GTsized2.h"
 
+// Enumeration of gameState machine
 enum gameState {
   START,
   START_NODRAW,
   LEVEL1,
   LEVEL1_NODRAW,
+  LEVEL2,
+  LEVEL2_NODRAW,
+  LEVEL3,
+  LEVEL3_NODRAW,
   YOU_WIN,
   GAME_OVER,
   GAME_OVER_NODRAW
 };
 
+// gameState prototypes
 void handlePlayerPlatformInput(PLATFORM* plat);
 void handleGameState(enum gameState* state, unsigned int* blockCounter, BLOCK blocks[L1_NUMBLOCKS],
-  PLATFORM* platform, BALL* ball, unsigned int* score, char scoreBuffer[]);
+  PLATFORM* platform, BALL* ball, unsigned int* score, char scoreBuffer[], const u16* splash);
 
 int main() {
+
+  // Initialize graphics on screen
   INIT_MODE_3;
 	enum gameState state = START;
 
@@ -36,15 +47,23 @@ int main() {
   BALL ball;
   ball.image = footballsized3;
 
+  // Allocate spaces for block structs for each level
   BLOCK L1_BLOCKS[L1_NUMBLOCKS];
+  BLOCK L2_BLOCKS[L2_NUMBLOCKS];
+  BLOCK L3_BLOCKS[L3_NUMBLOCKS];
 
+  // Allocate space for block counter
   unsigned int numBlocks = 0;
 
+  // Initialize button listeners
   unsigned int aPressed = 0;
   unsigned int selectPressed = 0;
+
+  // Score counters
   unsigned int score = 0;
   unsigned int highScore = 0;
 
+  // Strings to write scores to for later update onscreen
   char scoreBuffer[sizeof(unsigned int) * 3 + 2];
   char highScoreBuffer[sizeof(unsigned int) * 3 + 2];
 
@@ -72,138 +91,26 @@ int main() {
           createLevel1(&numBlocks, L1_BLOCKS, &platform, &ball);
           state = LEVEL1_NODRAW;
       }break; case LEVEL1_NODRAW: {
+        handleGameState(&state, &numBlocks, L1_BLOCKS, &platform, &ball, &score, scoreBuffer, buzz);
+      }break; case LEVEL2: {
+          createLevel2(&numBlocks, L2_BLOCKS, &platform, &ball);
+          state = LEVEL2_NODRAW;
+      }break; case LEVEL2_NODRAW: {
+        handleGameState(&state, &numBlocks, L2_BLOCKS, &platform, &ball, &score, scoreBuffer, florida);
+      }break;case LEVEL3: {
+          createLevel3(&numBlocks, L3_BLOCKS, &platform, &ball);
+          state = LEVEL3_NODRAW;
+      }break; case LEVEL3_NODRAW: {
+        handleGameState(&state, &numBlocks, L3_BLOCKS, &platform, &ball, &score, scoreBuffer, techringsized);
+      }break;case YOU_WIN: {
+          DRAW_YOU_WIN_SPLASH;
 
-        handleGameState(&state, &numBlocks, L1_BLOCKS, &platform, &ball, &score, scoreBuffer);
-
-
-          /*if (!numBlocks) {
-              state = YOU_WIN;
+          if (score > highScore) {
+            highScore = score;
+            drawRect(0, 200, 40, 10, BLACK);
+            sprintf(highScoreBuffer, "%d", highScore);
+            drawString(0, 200, highScoreBuffer, WHITE);
           }
-
-          handlePlayerPlatformInput(&platform);
-
-          if (platform.cdel != 0) {
-              platform.col += platform.cdel;
-
-              replace(platform.row, platform.col - platform.cdel, 30, 15, techringsized);
-
-              drawSprite(platform.row,
-                platform.col, 30, 15, GTsized2);
-          }
-
-          ball.col += ball.cdel;
-          ball.row += ball.rdel;
-
-          replace(ball.row - ball.rdel, ball.col - ball.cdel, 10, 8, techringsized);
-
-          drawSprite(ball.row,
-            ball.col, 10, 8, footballsized3);
-
-            if (ball.row + 7 >= platform.row && ball.row + 7 <= platform.row + 15) {
-              if (ball.col + 6 >= platform.col && ball.col <= platform.col + 26) {
-                ball.rdel = -1;
-                ball.cdel = 1 * (platform.cdel / 2);
-              }
-            } else if (ball.row + 7 >= platform.row && ball.row <= platform.row + 8) {
-              if (ball.col == platform.col - 7) {
-                ball.rdel = -1;
-                ball.cdel = -1;
-              } else if (ball.col == platform.col + 26) {
-                ball.rdel = -1;
-                ball.cdel = 1;
-              }
-            } else if (ball.row + 7 >= platform.row && ball.row <= platform.row) {
-              if (ball.col == platform.col - 7) {
-                ball.cdel = -1;
-              } else if (ball.col == platform.col + 26) {
-                ball.cdel = 1;
-              }
-            }
-
-            if (ball.row > 160) {
-              state = GAME_OVER;
-            }
-
-            if (ball.row == 10) {
-              ball.rdel = 1;
-            }
-
-            if (ball.col == 0) {
-              ball.cdel = 1;
-            }
-
-            if (ball.col == 230) {
-              ball.cdel = -1;
-            }
-
-            for (int i = 0; i < L1_NUMBLOCKS; i++) {
-              if (ball.row == L1_BLOCKS[i].row + 8) {
-                if (ball.col + 5 >= L1_BLOCKS[i].col && ball.col <= L1_BLOCKS[i].col + 16) {
-                  ball.rdel = 1;
-
-                  score += 20;
-                  drawRect(0, 40, 40, 10, BLACK);
-                  sprintf(scoreBuffer, "%d", score);
-                  drawString(0, 40, scoreBuffer, WHITE);
-
-                  numBlocks--;
-
-                  replace(L1_BLOCKS[i].row, L1_BLOCKS[i].col, 16, 8, techringsized);
-
-                  L1_BLOCKS[i].col = -100;
-                  L1_BLOCKS[i].row = -100;
-                }
-              } else if (ball.row + 8 == L1_BLOCKS[i].row) {
-                  if (ball.col + 5 >= L1_BLOCKS[i].col && ball.col <= L1_BLOCKS[i].col + 16) {
-                    ball.rdel = -1;
-
-                    score += 20;
-                    drawRect(0, 40, 40, 10, BLACK);
-                    sprintf(scoreBuffer, "%d", score);
-                    drawString(0, 40, scoreBuffer, WHITE);
-
-                    numBlocks--;
-
-                    replace(L1_BLOCKS[i].row, L1_BLOCKS[i].col, 16, 8, techringsized);
-
-                    L1_BLOCKS[i].col = -100;
-                    L1_BLOCKS[i].row = -100;
-                  }
-              } else if (ball.row + 8 >= L1_BLOCKS[i].row && ball.row <= L1_BLOCKS[i].row + 8) {
-                  if (ball.col == L1_BLOCKS[i].col + 16) {
-                    ball.cdel = 1;
-
-                    score += 20;
-                    drawRect(0, 40, 40, 10, BLACK);
-                    sprintf(scoreBuffer, "%d", score);
-                    drawString(0, 40, scoreBuffer, WHITE);
-
-                    numBlocks--;
-
-                    replace(L1_BLOCKS[i].row, L1_BLOCKS[i].col, 16, 8, techringsized);
-
-                    L1_BLOCKS[i].col = -100;
-                    L1_BLOCKS[i].row = -100;
-                  } else if (ball.col + 10 == L1_BLOCKS[i].col) {
-                    ball.cdel = -1;
-
-                    score += 20;
-                    drawRect(0, 40, 40, 10, BLACK);
-                    sprintf(scoreBuffer, "%d", score);
-                    drawString(0, 40, scoreBuffer, WHITE);
-
-                    numBlocks--;
-
-                    replace(L1_BLOCKS[i].row, L1_BLOCKS[i].col, 16, 8, techringsized);
-
-                    L1_BLOCKS[i].col = -100;
-                    L1_BLOCKS[i].row = -100;
-                  }
-              }
-            }*/
-
-      }break; case YOU_WIN: {
-          drawImage3(10, 0, 240, 150, techringsized);
       }break; case GAME_OVER: {
           DRAW_GAME_OVER_SPLASH;
 
@@ -241,53 +148,78 @@ int main() {
   return 0;
 }
 
-void handleGameState(enum gameState* state, unsigned int* blockCounter, BLOCK blocks[L1_NUMBLOCKS],
-  PLATFORM* platform, BALL* ball, unsigned int* score, char scoreBuffer[]) {
+// Complex method that handles transition between level states, increments and
+// decrements the blockCounter, checking for win conditions, detects collisions within
+// an array of blocks with the ball, as well as collisions between the platform
+// and the ball, updates scores, and replaces drawn-over pixels from the platform, ball, and blocks
+void handleGameState(enum gameState* state, unsigned int* blockCounter, BLOCK blocks[],
+  PLATFORM* platform, BALL* ball, unsigned int* score, char scoreBuffer[], const u16* splash) {
 
+    // Check the blockCounter for a win or advancement condition
     if (!*blockCounter) {
-        *state = YOU_WIN;
+        switch(*state) {
+          case START: {
+              // THIS STATE HANDLED IN MAIN LOOP
+          } break; case START_NODRAW: {
+              // THIS STATE HANDLED IN MAIN LOOP
+          } break; case LEVEL1: {
+              // THIS STATE HANDLED IN MAIN LOOP
+          } break; case LEVEL1_NODRAW: {
+             *state = LEVEL2;
+          } break; case LEVEL2: {
+              // THIS STATE HANDLED IN MAIN LOOP
+          } break; case LEVEL2_NODRAW: {
+             *state = LEVEL3;
+          } break; case LEVEL3: {
+              // THIS STATE HANDLED IN MAIN LOOP
+          } break; case LEVEL3_NODRAW: {
+             *state = YOU_WIN;
+          } break; case YOU_WIN: {
+              // THIS STATE HANDLED IN MAIN LOOP
+          } break; case GAME_OVER: {
+              // THIS STATE HANDLED IN MAIN LOOP
+          } break; case GAME_OVER_NODRAW: {
+              // THIS STATE HANDLED IN MAIN LOOP
+          } break;
+        }
     }
 
     handlePlayerPlatformInput(platform);
 
+    // Only redraw the platform if we've moved
     if (platform -> cdel != 0) {
+
+        // Update platform position
         platform -> col += platform -> cdel;
 
-        replace(platform -> row, platform -> col - platform -> cdel, 30, 15, techringsized);
+        // Replace the old platform drawing with the splash screen behind it
+        replace(platform -> row, platform -> col - platform -> cdel, 30, 15, splash);
 
+        // Draw the platform in its new position
         drawSprite(platform -> row,
           platform -> col, 30, 15, GTsized2);
     }
 
+    // Update ball position
     ball -> col += ball -> cdel;
     ball -> row += ball -> rdel;
 
-    replace(ball -> row - ball -> rdel, ball -> col - ball -> cdel, 10, 8, techringsized);
+    // Replace the old ball drawing with the splash screen behind it
+    replace(ball -> row - ball -> rdel, ball -> col - ball -> cdel, 10, 8, splash);
 
+    // Draw the ball in its new position
     drawSprite(ball -> row,
       ball -> col, 10, 8, footballsized3);
 
+      // Check if the ball has collided with the platform
       if (ball -> row + 7 >= platform -> row && ball -> row + 7 <= platform -> row + 15) {
         if (ball -> col + 6 >= platform -> col && ball -> col <= platform -> col + 26) {
           ball -> rdel = -1;
           ball -> cdel = 1 * (platform -> cdel / 2);
         }
-      } /*else if (ball.row + 7 >= platform.row && ball.row <= platform.row + 8) {
-        if (ball.col == platform.col - 7) {
-          ball.rdel = -1;
-          ball.cdel = -1;
-        } else if (ball.col == platform.col + 26) {
-          ball.rdel = -1;
-          ball.cdel = 1;
-        }
-      } else if (ball.row + 7 >= platform.row && ball.row <= platform.row) {
-        if (ball.col == platform.col - 7) {
-          ball.cdel = -1;
-        } else if (ball.col == platform.col + 26) {
-          ball.cdel = 1;
-        }
-      }*/
+      }
 
+      // Check if the ball has collided with the bounds of the screen
       if (ball -> row > 160) {
         *state = GAME_OVER;
       }
@@ -304,8 +236,10 @@ void handleGameState(enum gameState* state, unsigned int* blockCounter, BLOCK bl
         ball -> cdel = -1;
       }
 
+      // Loop that checks if the ball has collided with any blocks
       for (int i = 0; i < L1_NUMBLOCKS; i++) {
-        if (ball -> row == blocks[i].row + 8) {
+
+        if (ball -> row == blocks[i].row + 8) { // Check bottom side of a block
           if (ball -> col + 5 >= blocks[i].col && ball -> col <= blocks[i].col + 16) {
             ball -> rdel = 1;
 
@@ -316,12 +250,12 @@ void handleGameState(enum gameState* state, unsigned int* blockCounter, BLOCK bl
 
             *blockCounter = *blockCounter - 1;
 
-            replace(blocks[i].row, blocks[i].col, 16, 8, techringsized);
+            replace(blocks[i].row, blocks[i].col, 16, 8, splash);
 
             blocks[i].col = -100;
             blocks[i].row = -100;
           }
-        } else if (ball -> row + 8 == blocks[i].row) {
+        } else if (ball -> row + 8 == blocks[i].row) { // Check top side of a block
             if (ball -> col + 5 >= blocks[i].col && ball -> col <= blocks[i].col + 16) {
               ball -> rdel = -1;
 
@@ -332,13 +266,13 @@ void handleGameState(enum gameState* state, unsigned int* blockCounter, BLOCK bl
 
               *blockCounter = *blockCounter - 1;
 
-              replace(blocks[i].row, blocks[i].col, 16, 8, techringsized);
+              replace(blocks[i].row, blocks[i].col, 16, 8, splash);
 
               blocks[i].col = -100;
               blocks[i].row = -100;
             }
         } else if (ball -> row + 8 >= blocks[i].row && ball -> row <= blocks[i].row + 8) {
-            if (ball -> col == blocks[i].col + 16) {
+            if (ball -> col == blocks[i].col + 16) { // Check left side of a block
               ball -> cdel = 1;
 
               *score += 20;
@@ -348,11 +282,11 @@ void handleGameState(enum gameState* state, unsigned int* blockCounter, BLOCK bl
 
               *blockCounter = *blockCounter - 1;
 
-              replace(blocks[i].row, blocks[i].col, 16, 8, techringsized);
+              replace(blocks[i].row, blocks[i].col, 16, 8, splash);
 
               blocks[i].col = -100;
               blocks[i].row = -100;
-            } else if (ball -> col + 10 == blocks[i].col) {
+            } else if (ball -> col + 10 == blocks[i].col) { // Check right side of a block
               ball -> cdel = -1;
 
               *score += 20;
@@ -362,7 +296,7 @@ void handleGameState(enum gameState* state, unsigned int* blockCounter, BLOCK bl
 
               *blockCounter = *blockCounter - 1;
 
-              replace(blocks[i].row, blocks[i].col, 16, 8, techringsized);
+              replace(blocks[i].row, blocks[i].col, 16, 8, splash);
 
               blocks[i].col = -100;
               blocks[i].row = -100;
@@ -371,6 +305,7 @@ void handleGameState(enum gameState* state, unsigned int* blockCounter, BLOCK bl
       }
 }
 
+// Method that handles player input, which moves the platform
 void handlePlayerPlatformInput(PLATFORM* platform) {
   if (KEY_DOWN_NOW(BUTTON_LEFT) && !(platform -> col <= 0)) {
     platform -> cdel = -2;

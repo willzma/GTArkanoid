@@ -11,12 +11,12 @@ PROGNAME = cleanOldFashionedHate
 
 # The object files you want to compile into your program
 # This should be a space (SPACE!) separated list of .o files
-OFILES = main.o levels.o graphics.o redBlock.o whiteBlock.o font.o footballsized3.o gameoversized.o GTsized2.o startsplashsized.o techringsized.o
+OFILES = main.o levels.o graphics.o redBlock.o whiteBlock.o blackBlock.o blueBlock.o goldBlock.o greenBlock.o lightBlueBlock.o maroonBlock.o orangeBlock.o font.o footballsized3.o gameoversized.o GTsized2.o startsplashsized.o techringsized.o buzz.o florida.o you_win.o
 
 # The header files you have created.
 # This is necessary to determine when to recompile for files.
 # This should be a space (SPACE!) separated list of .h files
-HFILES = graphics.h levels.h input.h redBlock.h whiteBlock.h footballsized3.h gameoversized.h GTsized2.h startsplashsized.h techringsized.h
+HFILES = graphics.h levels.h input.h redBlock.h whiteBlock.h blackBlock.h blueBlock.h goldBlock.h greenBlock.h lightBlueBlock.h maroonBlock.h orangeBlock.h footballsized3.h gameoversized.h GTsized2.h startsplashsized.h techringsized.h buzz.h florida.h you_win.h
 
 ################################################################################
 # These are various settings used to make the GBA toolchain work
