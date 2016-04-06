@@ -168,10 +168,12 @@ void handleGameState(enum gameState* state, unsigned int* blockCounter, BLOCK bl
               // THIS STATE HANDLED IN MAIN LOOP
           } break; case LEVEL1_NODRAW: {
              *state = LEVEL2;
+             delay(1);
           } break; case LEVEL2: {
               // THIS STATE HANDLED IN MAIN LOOP
           } break; case LEVEL2_NODRAW: {
              *state = LEVEL3;
+             delay(1);
           } break; case LEVEL3: {
               // THIS STATE HANDLED IN MAIN LOOP
           } break; case LEVEL3_NODRAW: {
@@ -240,9 +242,9 @@ void handleGameState(enum gameState* state, unsigned int* blockCounter, BLOCK bl
 
       // Loop that checks if the ball has collided with any blocks
       for (int i = 0; i < L1_NUMBLOCKS; i++) {
-
-        if (ball -> row == blocks[i].row + 8) { // Check bottom side of a block
-          if (ball -> col + 5 >= blocks[i].col && ball -> col <= blocks[i].col + 16) {
+         // Check bottom side of a block
+        if (ball -> row == blocks[i].row + 8
+          && (ball -> col + 10 >= blocks[i].col && ball -> col <= blocks[i].col + 16)) {
             ball -> rdel = 1;
 
             *score += 20;
@@ -256,9 +258,8 @@ void handleGameState(enum gameState* state, unsigned int* blockCounter, BLOCK bl
 
             blocks[i].col = -100;
             blocks[i].row = -100;
-          }
-        } else if (ball -> row + 8 == blocks[i].row) { // Check top side of a block
-            if (ball -> col + 5 >= blocks[i].col && ball -> col <= blocks[i].col + 16) {
+        } else if (ball -> row + 8 == blocks[i].row
+          && (ball -> col + 10 >= blocks[i].col && ball -> col <= blocks[i].col + 16)) { // Check top side of a block
               ball -> rdel = -1;
 
               *score += 20;
@@ -272,9 +273,8 @@ void handleGameState(enum gameState* state, unsigned int* blockCounter, BLOCK bl
 
               blocks[i].col = -100;
               blocks[i].row = -100;
-            }
-        } else if (ball -> row + 8 >= blocks[i].row && ball -> row <= blocks[i].row + 8) {
-            if (ball -> col == blocks[i].col + 16) { // Check left side of a block
+        } else if (ball -> row + 8 >= blocks[i].row && ball -> row <= blocks[i].row + 8
+          && ball -> col == blocks[i].col + 16) { // Check left side of a block
               ball -> cdel = 1;
 
               *score += 20;
@@ -288,7 +288,8 @@ void handleGameState(enum gameState* state, unsigned int* blockCounter, BLOCK bl
 
               blocks[i].col = -100;
               blocks[i].row = -100;
-            } else if (ball -> col + 10 == blocks[i].col) { // Check right side of a block
+        } else if (ball -> row + 8 >= blocks[i].row && ball -> row <= blocks[i].row + 8
+          && ball -> col + 10 == blocks[i].col) { // Check right side of a block
               ball -> cdel = -1;
 
               *score += 20;
@@ -302,7 +303,6 @@ void handleGameState(enum gameState* state, unsigned int* blockCounter, BLOCK bl
 
               blocks[i].col = -100;
               blocks[i].row = -100;
-            }
         }
       }
 }
