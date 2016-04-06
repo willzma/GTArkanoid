@@ -74,9 +74,11 @@ int main() {
         DRAW_START_SPLASH;
         drawString(0, 0, "SCORE", WHITE);
         score = 0;
+        drawRect(0, 40, 40, 10, BLACK);
         sprintf(scoreBuffer, "%d", score);
         drawString(0, 40, scoreBuffer, WHITE);
         drawString(0, 140, "HI-SCORE", WHITE);
+        drawRect(0, 200, 40, 10, BLACK);
         sprintf(highScoreBuffer, "%d", highScore);
         drawString(0, 200, highScoreBuffer, WHITE);
         state = START_NODRAW;
